@@ -7,7 +7,12 @@ User = get_user_model()
 
 
 class Review(models.Model):
-    title = models.IntegerField(default=0)
+    title = models.ForeignKey(
+        'Title',
+        verbose_name='Произведение',
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
     text = models.TextField(
         verbose_name='Текст',
     )
@@ -43,7 +48,7 @@ class Comment(models.Model):
         Review,
         verbose_name='Ревью',
         on_delete=models.CASCADE,
-        related_name='commens'
+        related_name='comments'
     )
     text = models.TextField(
         verbose_name='Текст',
