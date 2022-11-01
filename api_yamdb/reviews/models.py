@@ -55,11 +55,13 @@ class Title(models.Model):
     genre = models.ManyToManyField(
         Genre,
         verbose_name='Slug жанра',
-        on_delete=models.SET_NULL,
+        # on_delete=models.SET_NULL, - такого параметра нет у ManyToManyField
         related_name='titles'
     )
     category = models.ForeignKey(
         Category,
+        blank=True,     # это обязательно при
+        null=True,      # on_delete=models.SET_NULL
         verbose_name='Slug категории',
         on_delete=models.SET_NULL,
         related_name='titles'
