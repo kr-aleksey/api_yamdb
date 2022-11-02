@@ -1,6 +1,15 @@
+from reviews.models import Review, Comment
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from reviews.models import Review, Comment
+User = get_user_model()
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')
+
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -36,3 +45,5 @@ class CommentSerializer(serializers.ModelSerializer):
             'pub_date',
         )
         read_only_fields = ('author', )
+
+

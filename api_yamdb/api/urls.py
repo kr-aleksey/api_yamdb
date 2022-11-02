@@ -3,6 +3,7 @@ from rest_framework import routers
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .views import (
+    UserViewSet,
     ReviewViewSet,
     CommentViewSet
 )
@@ -18,6 +19,7 @@ v1_router.register(
     CommentViewSet,
     basename='comment'
 )
+v1_router.register(r'users', UserViewSet, basename='users')
 
 urlpatterns = [
     path('v1/', include(v1_router.urls)),

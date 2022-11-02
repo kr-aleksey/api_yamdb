@@ -1,12 +1,17 @@
+from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 
 from reviews.models import Review
 from .permissions import AuthorOrReadOnly
-from .serializers import (
-    ReviewSerializer,
-    CommentSerializer
-)
+from . import serializers
+
+User = get_user_model()
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = serializers.UserSerializer
 
 
 class CommonViewSet(viewsets.ModelViewSet):
@@ -14,7 +19,7 @@ class CommonViewSet(viewsets.ModelViewSet):
 
 
 class ReviewViewSet(CommonViewSet):
-    serializer_class = ReviewSerializer
+    serializer_class = serializers.ReviewSerializer
 
     def get_queryset(self):
         return Review.objects.all()
@@ -27,7 +32,7 @@ class ReviewViewSet(CommonViewSet):
 
 
 class CommentViewSet(CommonViewSet):
-    serializer_class = CommentSerializer
+    serializer_class = serializers.CommentSerializer
 
     def get_queryset(self):
         review = get_object_or_404(Review, id=self.kwargs['review_id'])
@@ -38,3 +43,6 @@ class CommentViewSet(CommonViewSet):
             author=self.request.user,
             review=Review.objects.get(id=self.kwargs['review_id'])
         )
+
+
+
