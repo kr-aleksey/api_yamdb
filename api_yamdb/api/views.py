@@ -3,8 +3,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 
 from reviews.models import Review
-from .permissions import AuthorOrReadOnly
 from . import serializers
+from .permissions import AuthorOrReadOnly
 
 User = get_user_model()
 
