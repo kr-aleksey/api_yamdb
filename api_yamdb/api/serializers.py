@@ -92,27 +92,73 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = ('name', 'slug',)
 
 
-class TitleSerializer(serializers.ModelSerializer):
+class TitleGetSerializer(serializers.ModelSerializer):
 
-    genre = GenreSerializer(many=True,)
-    category = CategorySerializer()
     description = serializers.StringRelatedField(required=False,)
-    rating = serializers.SerializerMethodField()
+    # rating = serializers.SerializerMethodField()
+    genre = GenreSerializer(many=True, read_only=True)
+    category = CategorySerializer(read_only=True)
 
     class Meta:
         model = Title
         fields = (
             'id', 'name', 'year', 'description',
-            'rating',
+            # 'rating',
             'genre', 'category',
         )
-        read_only_fields = ('id', 'description')
 
-    def get_rating(self, obj):
-        title = get_object_or_404(Title, id=self.kwargs['title_id'])
-        review_list = title.reviews.select_related('title')
-        score_review_list = []
-        for review in review_list:
-            score_review_list += review.score
-        rating = statistics.mean(score_review_list)
-        return rating
+
+class TitlePostSerializer(serializers.ModelSerializer):
+
+    description = serializers.StringRelatedField(required=False,)
+    # rating = serializers.SerializerMethodField()
+    genre = GenreSerializer(many=True,)
+    category = CategorySerializer()
+
+    class Meta:
+        model = Title
+        fields = (
+            'id', 'name', 'year', 'description',
+            # 'rating',
+            'genre', 'category',
+        )
+
+    def create(self, validated_data):
+        genres_slugs = validated_data.pop('genre')
+        category_slug = validated_data.pop('category')
+
+        title = Title.objects.create(**validated_data)
+
+        for slug in genres_slugs:
+            this_genre = Genre.objects.get(slug=slug)
+            title.genre.add(this_genre)
+
+        this_category = Category.objects.get(slug=category_slug)
+        title.category.add(this_category)
+
+        return title
+
+
+class TitleSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Title
+        fields = (
+            'id', 'name', 'year', 'description',
+            # 'rating',
+            'genre', 'category',
+        )
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return TitleGetSerializer
+        return TitlePostSerializer
+
+    # def get_rating(self, obj):
+    #     title = get_object_or_404(Title, id=self.kwargs['title_id'])
+    #     review_list = title.reviews.select_related('title')
+    #     score_review_list = []
+    #     for review in review_list:
+    #         score_review_list += review.score
+    #     rating = statistics.mean(score_review_list)
+    #     return rating
