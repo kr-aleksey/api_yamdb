@@ -1,13 +1,15 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model, authenticate
 from django.shortcuts import get_object_or_404
-from rest_framework import views, viewsets, permissions, status
+from rest_framework import views, viewsets, mixins, permissions, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework.validators import ValidationError
+from datetime import datetime
 
-from reviews.models import Review
+from reviews.models import Category, Genre, Review, Title
 from . import serializers
-from .permissions import AuthorOrReadOnly
+from .permissions import AuthorOrReadOnly, AdminOrReadOnly
 from users.services import send_confirmation_mail
 
 User = get_user_model()
@@ -68,6 +70,45 @@ class CommonViewSet(viewsets.ModelViewSet):
     permission_classes = (AuthorOrReadOnly, )
 
 
+class ListCreateDestroyViewSet(
+    mixins.ListModelMixin, mixins.CreateModelMixin,
+    mixins.DestroyModelMixin, viewsets.GenericViewSet
+):
+    pass
+
+
+class CategoryViewSet(ListCreateDestroyViewSet):
+    queryset = Category.objects.all()
+    serializer_class = serializers.CategorySerializer
+    permission_classes = (AdminOrReadOnly, )
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+
+class GenreViewSet(ListCreateDestroyViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = serializers.GenreSerializer
+    permission_classes = (AdminOrReadOnly, )
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+
+class TitleViewSet(CommonViewSet):
+    queryset = Title.objects.all()
+    serializer_class = serializers.TitleSerializer
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+    def validate_year(self, value):
+        year_today = datetime.date.today().year
+        if not (0 < value <= (year_today + 10)):
+            raise serializers.ValidationError('Проверьте корректность года!')
+        return value
+
+
 class ReviewViewSet(CommonViewSet):
     serializer_class = serializers.ReviewSerializer
 
@@ -75,9 +116,17 @@ class ReviewViewSet(CommonViewSet):
         return Review.objects.all()
 
     def perform_create(self, serializer):
+        title = get_object_or_404(Title, id=self.kwargs['title_id'])
+        author = self.request.user
+        if Review.objects.filter(
+            title=title,
+            author=author
+        ).exists():
+            raise ValidationError('Нельзя размещать более одного ревью.')
+
         serializer.save(
-            author=self.request.user,
-            # title=Title.objects.get(id=self.kwargs['title_id'])
+            title=title,
+            author=author,
         )
 
 
@@ -89,7 +138,13 @@ class CommentViewSet(CommonViewSet):
         return review.comments.all()
 
     def perform_create(self, serializer):
+        review = get_object_or_404(Review, id=self.kwargs['review_id'])
+        title = get_object_or_404(Title, id=self.kwargs['title_id'])
+
+        if review.title != title:
+            raise ValidationError('Ревью не соответствует Произвдению')
+
         serializer.save(
             author=self.request.user,
-            review=Review.objects.get(id=self.kwargs['review_id'])
+            review=review
         )
