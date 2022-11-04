@@ -56,13 +56,12 @@ class Title(models.Model):
     genre = models.ManyToManyField(
         Genre,
         verbose_name='Slug жанра',
-        # on_delete=models.SET_NULL, - такого параметра нет у ManyToManyField
         related_name='titles'
     )
     category = models.ForeignKey(
         Category,
-        blank=True,     # это обязательно при
-        null=True,      # on_delete=models.SET_NULL
+        blank=True,
+        null=True,
         verbose_name='Slug категории',
         on_delete=models.SET_NULL,
         related_name='titles'
@@ -78,7 +77,7 @@ class Title(models.Model):
 
 class Review(models.Model):
     title = models.ForeignKey(
-        'Title',
+        Title,
         verbose_name='Произведение',
         on_delete=models.CASCADE,
         related_name='reviews'
@@ -110,7 +109,12 @@ class Review(models.Model):
     class Meta:
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
-        unique_together = ('title', 'author')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'author'],
+                name='unique_title_author'
+            ),
+        ]
 
 
 class Comment(models.Model):
@@ -129,7 +133,10 @@ class Comment(models.Model):
         on_delete=models.CASCADE,
         related_name='comments'
     )
-    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
+    pub_date = models.DateTimeField(
+        verbose_name='Дата публикации',
+        auto_now_add=True
+    )
 
     def __str__(self):
         return self.text[:50]

@@ -9,14 +9,20 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')
-
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role'
+        )
 
 
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='username'
+        slug_field='username',
+        read_only=True
     )
 
     class Meta:
@@ -28,13 +34,12 @@ class ReviewSerializer(serializers.ModelSerializer):
             'score',
             'pub_date',
         )
-        read_only_fields = ('author',)
 
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='username'
+        slug_field='username',
+        read_only=True
     )
 
     class Meta:
@@ -45,6 +50,3 @@ class CommentSerializer(serializers.ModelSerializer):
             'author',
             'pub_date',
         )
-        read_only_fields = ('author', )
-
-
