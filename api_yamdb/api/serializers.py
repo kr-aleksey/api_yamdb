@@ -1,6 +1,8 @@
 import statistics
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from reviews.models import Category, Comment, Genre, Review, Title
@@ -92,20 +94,25 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class TitleSerializer(serializers.ModelSerializer):
 
-    #  genre = serializers.StringRelatedField(many=True, read_only=True)
+    genre = GenreSerializer(many=True,)
+    category = CategorySerializer()
+    description = serializers.StringRelatedField(required=False,)
     rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Title
         fields = (
-            'name', 'year',
+            'id', 'name', 'year', 'description',
             'rating',
-            'description',
             'genre', 'category',
         )
+        read_only_fields = ('id', 'description')
 
     def get_rating(self, obj):
-        score_list = []
-        #  for score in scores:
-
-        return statistics.mean(score_list)
+        title = get_object_or_404(Title, id=self.kwargs['title_id'])
+        review_list = title.reviews.select_related('title')
+        score_review_list = []
+        for review in review_list:
+            score_review_list += review.score
+        rating = statistics.mean(score_review_list)
+        return rating

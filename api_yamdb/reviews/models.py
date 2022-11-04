@@ -56,13 +56,12 @@ class Title(models.Model):
     genre = models.ManyToManyField(
         Genre,
         verbose_name='Slug жанра',
-        # on_delete=models.SET_NULL, - такого параметра нет у ManyToManyField
         related_name='titles'
     )
     category = models.ForeignKey(
         Category,
-        blank=True,     # это обязательно при
-        null=True,      # on_delete=models.SET_NULL
+        blank=True,
+        null=True,
         verbose_name='Slug категории',
         on_delete=models.SET_NULL,
         related_name='titles'
@@ -78,7 +77,7 @@ class Title(models.Model):
 
 class Review(models.Model):
     title = models.ForeignKey(
-        'Title',
+        Title,
         verbose_name='Произведение',
         on_delete=models.CASCADE,
         related_name='reviews'

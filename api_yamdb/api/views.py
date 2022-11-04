@@ -1,16 +1,19 @@
+from datetime import date
+
 from django.conf import settings
-from django.contrib.auth import get_user_model, authenticate
+from django.contrib.auth import authenticate, get_user_model
 from django.shortcuts import get_object_or_404
-from rest_framework import views, viewsets, mixins, permissions, status
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import (filters, mixins, permissions, status, views,
+                            viewsets)
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.validators import ValidationError
-from datetime import datetime
+from rest_framework_simplejwt.tokens import AccessToken
+from users.services import send_confirmation_mail
 
 from reviews.models import Category, Genre, Review, Title
 from . import serializers
-from .permissions import AuthorOrReadOnly, AdminOrReadOnly
-from users.services import send_confirmation_mail
+from .permissions import AdminOrReadOnly, AuthorOrReadOnly
 
 User = get_user_model()
 
@@ -82,8 +85,8 @@ class CategoryViewSet(ListCreateDestroyViewSet):
     serializer_class = serializers.CategorySerializer
     permission_classes = (AdminOrReadOnly, )
 
-    def perform_create(self, serializer):
-        serializer.save()
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
 
 
 class GenreViewSet(ListCreateDestroyViewSet):
@@ -91,21 +94,23 @@ class GenreViewSet(ListCreateDestroyViewSet):
     serializer_class = serializers.GenreSerializer
     permission_classes = (AdminOrReadOnly, )
 
-    def perform_create(self, serializer):
-        serializer.save()
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
 
 
 class TitleViewSet(CommonViewSet):
     queryset = Title.objects.all()
     serializer_class = serializers.TitleSerializer
 
-    def perform_create(self, serializer):
-        serializer.save()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('category', 'genre', 'name', 'year')
 
     def validate_year(self, value):
-        year_today = datetime.date.today().year
-        if not (0 < value <= (year_today + 10)):
-            raise serializers.ValidationError('Проверьте корректность года!')
+        year_today = date.today().year
+        if not (0 < value <= year_today):
+            raise serializers.ValidationError(
+                'Год выпуска не может быть больше текущего'
+            )
         return value
 
 
