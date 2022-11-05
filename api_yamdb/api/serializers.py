@@ -95,7 +95,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class TitleGetSerializer(serializers.ModelSerializer):
 
-    # rating = serializers.SerializerMethodField()
+    rating = serializers.SerializerMethodField()
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
 
@@ -103,7 +103,7 @@ class TitleGetSerializer(serializers.ModelSerializer):
         model = Title
         fields = (
             'id', 'name', 'year', 'description',
-            # 'rating',
+            'rating',
             'genre', 'category',
         )
 
@@ -119,7 +119,6 @@ class TitleGetSerializer(serializers.ModelSerializer):
 
 class TitlePostSerializer(serializers.ModelSerializer):
 
-    description = serializers.StringRelatedField(required=False,)
     genre = GenreSerializer(many=True,)
     category = CategorySerializer()
 
