@@ -6,6 +6,7 @@ User = get_user_model()
 
 
 class Category(models.Model):
+    """Модель категорий произведений."""
     name = models.CharField(
         max_length=256,
         verbose_name='Название категории',
@@ -24,6 +25,7 @@ class Category(models.Model):
 
 
 class Genre(models.Model):
+    """Модель жанров произведений."""
     name = models.CharField(
         max_length=256,
         verbose_name='Название жанра',
@@ -42,6 +44,7 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
+    """Модель произведений."""
     name = models.CharField(
         max_length=200,
         verbose_name='Название',
@@ -76,6 +79,7 @@ class Title(models.Model):
 
 
 class Review(models.Model):
+    """Модель отзывов к произведениям."""
     title = models.ForeignKey(
         Title,
         verbose_name='Произведение',
@@ -118,6 +122,7 @@ class Review(models.Model):
 
 
 class Comment(models.Model):
+    """Модель комментариев к отзывам к произведениям."""
     review = models.ForeignKey(
         Review,
         verbose_name='Ревью',
