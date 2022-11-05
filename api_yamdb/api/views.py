@@ -4,18 +4,16 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import (filters, mixins)
 from rest_framework import views, viewsets, permissions, status
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.validators import ValidationError
 from rest_framework_simplejwt.tokens import AccessToken
 
-from reviews.models import Category, Genre, Review, Title
+from reviews.models import Category, Genre, Title
 from reviews.models import Review
-from . import serializers
-from .permissions import AuthorOrReadOnly, UserAPIPermissions
 from users.services import send_confirmation_mail
 from . import serializers
 from .permissions import AdminOrReadOnly, AuthorOrReadOnly
+from .permissions import UserAPIPermissions
 
 User = get_user_model()
 
