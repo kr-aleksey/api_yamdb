@@ -98,11 +98,16 @@ class GenreViewSet(ListCreateDestroyViewSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    serializer_class = serializers.TitleSerializer
+    # serializer_class = serializers.TitleSerializer
     permission_classes = (AdminOrReadOnly,)
 
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('category', 'genre', 'name', 'year')
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return serializers.TitleGetSerializer
+        return serializers.TitlePostSerializer
 
 
 class ReviewViewSet(CommonViewSet):

@@ -152,19 +152,3 @@ class TitlePostSerializer(serializers.ModelSerializer):
         title.category.add(this_category)
 
         return title
-
-
-class TitleSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Title
-        fields = (
-            'id', 'name', 'year', 'description',
-            # 'rating',
-            'genre', 'category',
-        )
-
-    def get_serializer_class(self):
-        if self.request.method == 'GET':
-            return TitleGetSerializer
-        return TitlePostSerializer
