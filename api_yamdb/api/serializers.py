@@ -44,8 +44,8 @@ class TokenObtainSerializer(serializers.Serializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='username'
+        slug_field='username',
+        read_only=True
     )
 
     class Meta:
@@ -57,13 +57,12 @@ class ReviewSerializer(serializers.ModelSerializer):
             'score',
             'pub_date',
         )
-        read_only_fields = ('author',)
 
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='username'
+        slug_field='username',
+        read_only=True
     )
 
     class Meta:
@@ -74,4 +73,3 @@ class CommentSerializer(serializers.ModelSerializer):
             'author',
             'pub_date',
         )
-        read_only_fields = ('author', )
