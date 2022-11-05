@@ -107,6 +107,15 @@ class TitleGetSerializer(serializers.ModelSerializer):
             'genre', 'category',
         )
 
+    # def get_rating(self, obj):
+    #     title = get_object_or_404(Title, id=self.kwargs['title_id'])
+    #     review_list = title.reviews.select_related('title')
+    #     score_review_list = []
+    #     for review in review_list:
+    #         score_review_list += review.score
+    #     rating = statistics.mean(score_review_list)
+    #     return rating
+
 
 class TitlePostSerializer(serializers.ModelSerializer):
 
@@ -128,15 +137,6 @@ class TitlePostSerializer(serializers.ModelSerializer):
                 'Год выпуска не может быть больше текущего'
             )
         return value
-
-    # def get_rating(self, obj):
-    #     title = get_object_or_404(Title, id=self.kwargs['title_id'])
-    #     review_list = title.reviews.select_related('title')
-    #     score_review_list = []
-    #     for review in review_list:
-    #         score_review_list += review.score
-    #     rating = statistics.mean(score_review_list)
-    #     return rating
 
     def create(self, validated_data):
         genres_slugs = validated_data.pop('genre')
