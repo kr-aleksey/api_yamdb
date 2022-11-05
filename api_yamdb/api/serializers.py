@@ -111,7 +111,6 @@ class TitleGetSerializer(serializers.ModelSerializer):
 class TitlePostSerializer(serializers.ModelSerializer):
 
     description = serializers.StringRelatedField(required=False,)
-    # rating = serializers.SerializerMethodField()
     genre = GenreSerializer(many=True,)
     category = CategorySerializer()
 
@@ -119,7 +118,6 @@ class TitlePostSerializer(serializers.ModelSerializer):
         model = Title
         fields = (
             'id', 'name', 'year', 'description',
-            # 'rating',
             'genre', 'category',
         )
 
