@@ -98,7 +98,7 @@ class GenreViewSet(ListCreateDestroyViewSet):
     search_fields = ('name',)
 
 
-class TitleViewSet(CommonViewSet):
+class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = serializers.TitleSerializer
     permission_classes = (AdminOrReadOnly,)
