@@ -4,11 +4,15 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import (filters, mixins)
 from rest_framework import views, viewsets, permissions, status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.validators import ValidationError
 from rest_framework_simplejwt.tokens import AccessToken
 
 from reviews.models import Category, Genre, Review, Title
+from reviews.models import Review
+from . import serializers
+from .permissions import AuthorOrReadOnly, UserAPIPermissions
 from users.services import send_confirmation_mail
 from . import serializers
 from .permissions import AdminOrReadOnly, AuthorOrReadOnly
@@ -19,7 +23,32 @@ User = get_user_model()
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = serializers.UserSerializer
+    permission_classes = [UserAPIPermissions]
     lookup_field = 'username'
+
+    def get_object(self):
+        username = self.kwargs.get('username')
+        if username == 'me':
+            user = self.request.user
+        else:
+            user = get_object_or_404(User, username=username)
+        self.check_object_permissions(self.request, user)
+        return user
+
+    def destroy(self, request, *args, **kwargs):
+        user = self.get_object()
+        if user == request.user:
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def perform_update(self, serializer):
+        user = self.request.user
+        if (user == serializer.instance
+                and not user.is_admin()
+                and 'role' in serializer.validated_data):
+            serializer.validated_data.pop('role')
+        serializer.save()
 
 
 class SignupView(views.APIView):
