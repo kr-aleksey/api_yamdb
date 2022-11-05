@@ -98,7 +98,6 @@ class GenreViewSet(ListCreateDestroyViewSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    # serializer_class = serializers.TitleSerializer
     permission_classes = (AdminOrReadOnly,)
 
     filter_backends = (DjangoFilterBackend,)
