@@ -1,4 +1,5 @@
 import statistics
+from datetime import date
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -121,6 +122,14 @@ class TitlePostSerializer(serializers.ModelSerializer):
             # 'rating',
             'genre', 'category',
         )
+
+    def validate_year(self, value):
+        year_today = date.today().year
+        if not (0 < value <= year_today):
+            raise serializers.ValidationError(
+                'Год выпуска не может быть больше текущего'
+            )
+        return value
 
     # def get_rating(self, obj):
     #     title = get_object_or_404(Title, id=self.kwargs['title_id'])

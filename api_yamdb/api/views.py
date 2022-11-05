@@ -1,5 +1,3 @@
-from datetime import date
-
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model
 from django.shortcuts import get_object_or_404
@@ -105,14 +103,6 @@ class TitleViewSet(viewsets.ModelViewSet):
 
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('category', 'genre', 'name', 'year')
-
-    def validate_year(self, value):
-        year_today = date.today().year
-        if not (0 < value <= year_today):
-            raise serializers.ValidationError(
-                'Год выпуска не может быть больше текущего'
-            )
-        return value
 
 
 class ReviewViewSet(CommonViewSet):
