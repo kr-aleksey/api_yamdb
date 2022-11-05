@@ -7,7 +7,6 @@ class User(AbstractUser):
     MODERATOR = 'moderator'
     USER = 'user'
 
-    EMAIL_FIELD = 'email'
     REQUIRED_FIELDS = ['email']
 
     ROLES = [
@@ -30,3 +29,13 @@ class User(AbstractUser):
         'Биография',
         blank=True
     )
+
+    def is_admin(self):
+        """Возвращает True, если пользователь
+        исполняет роль "Администратор". Иначе False."""
+        return self.is_superuser or self.role == self.ADMIN
+
+    def is_moderator(self):
+        """Возвращает True, если пользователь
+         исполняет роль "Модератор". Иначе False."""
+        return self.role == self.MODERATOR

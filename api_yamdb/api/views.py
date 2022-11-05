@@ -2,12 +2,13 @@ from django.conf import settings
 from django.contrib.auth import get_user_model, authenticate
 from django.shortcuts import get_object_or_404
 from rest_framework import views, viewsets, permissions, status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
 from reviews.models import Review
 from . import serializers
-from .permissions import AuthorOrReadOnly
+from .permissions import AuthorOrReadOnly, AdminOnly
 from users.services import send_confirmation_mail
 
 User = get_user_model()
@@ -16,7 +17,26 @@ User = get_user_model()
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = serializers.UserSerializer
+    permission_classes = [AdminOnly]
     lookup_field = 'username'
+
+    # def retrieve(self, request, *args, **kwargs):
+    #     username = kwargs.get('username')
+    #     if username == 'me':
+    #         user = request.user
+    #     else:
+    #         user = get_object_or_404(User, username=username)
+    #         self.check_object_permissions(request, user)
+    #     serializer = self.get_serializer(user)
+    #     return Response(serializer.data)
+
+    def get_object(self):
+        username = self.kwargs.get('username')
+        if username == 'me':
+            user = self.request.user
+        else:
+            user = get_object_or_404(User, username=username)
+        self.check_object_permissions(self.request, user)
 
 
 class SignupView(views.APIView):
