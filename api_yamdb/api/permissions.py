@@ -11,16 +11,14 @@ class AuthorOrReadOnly(permissions.IsAuthenticatedOrReadOnly):
         return obj.author == request.user
 
 
-class AdminOnly(permissions.BasePermission):
+class UserAPIPermissions(permissions.BasePermission):
     def has_permission(self, request, view):
+        if view.action == 'update':
+            return False
         user = request.user
-        if view.action in ['list', 'create']:
+        if view.action in ['list', 'create', 'destroy']:
             return bool(user and user.is_authenticated and user.is_admin())
         return bool(user and user.is_authenticated)
 
     def has_object_permission(self, request, view, obj):
-        a = request.user.is_admin()
-        b = request.user == obj
-        c = a or b
-        return c
-
+        return request.user.is_admin() or request.user == obj
