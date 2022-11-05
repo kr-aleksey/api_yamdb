@@ -94,7 +94,6 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class TitleGetSerializer(serializers.ModelSerializer):
 
-    description = serializers.StringRelatedField(required=False,)
     # rating = serializers.SerializerMethodField()
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
@@ -122,6 +121,15 @@ class TitlePostSerializer(serializers.ModelSerializer):
             # 'rating',
             'genre', 'category',
         )
+
+    # def get_rating(self, obj):
+    #     title = get_object_or_404(Title, id=self.kwargs['title_id'])
+    #     review_list = title.reviews.select_related('title')
+    #     score_review_list = []
+    #     for review in review_list:
+    #         score_review_list += review.score
+    #     rating = statistics.mean(score_review_list)
+    #     return rating
 
     def create(self, validated_data):
         genres_slugs = validated_data.pop('genre')
@@ -153,12 +161,3 @@ class TitleSerializer(serializers.ModelSerializer):
         if self.request.method == 'GET':
             return TitleGetSerializer
         return TitlePostSerializer
-
-    # def get_rating(self, obj):
-    #     title = get_object_or_404(Title, id=self.kwargs['title_id'])
-    #     review_list = title.reviews.select_related('title')
-    #     score_review_list = []
-    #     for review in review_list:
-    #         score_review_list += review.score
-    #     rating = statistics.mean(score_review_list)
-    #     return rating
