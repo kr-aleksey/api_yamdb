@@ -1,20 +1,15 @@
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model
 from django.shortcuts import get_object_or_404
-from rest_framework import permissions, status, views, viewsets
 from rest_framework import filters
+from rest_framework import permissions, status, views, viewsets
 from rest_framework.response import Response
 from rest_framework.validators import ValidationError
 from rest_framework_simplejwt.tokens import AccessToken
 
-from reviews.models import Category, Genre, Title
-from reviews.models import Review
-from users.services import send_confirmation_mail
-
 from reviews.models import Category, Genre, Review, Title
+from users.services import send_confirmation_mail
 from . import serializers
-from .permissions import AdminOrReadOnly, AuthorOrReadOnly
-from .permissions import UserAPIPermissions
 from .filters import TitleFilter
 from .mixins import ListCreateDestroyViewSet
 from .permissions import AdminOrReadOnly, AuthorOrReadOnly, UserAPIPermissions
