@@ -31,14 +31,6 @@ class UserViewSet(viewsets.ModelViewSet):
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def perform_update(self, serializer):
-        user = self.request.user
-        # if (user == serializer.instance
-        #         and not user.is_admin()
-        #         and 'role' in serializer.validated_data):
-        #     serializer.validated_data.pop('role')
-        serializer.save()
-
 
 class SignupView(views.APIView):
     permission_classes = [permissions.AllowAny]
