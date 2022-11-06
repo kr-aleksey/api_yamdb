@@ -3,15 +3,19 @@ from django.contrib.auth import authenticate, get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework import filters
 from rest_framework import permissions, status, views, viewsets
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, mixins, views, viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.validators import ValidationError
 from rest_framework_simplejwt.tokens import AccessToken
 
 from reviews.models import Category, Genre, Review, Title
+from reviews.models import Category, Genre, Title, Review
 from users.services import send_confirmation_mail
 from . import serializers
 from .filters import TitleFilter
 from .mixins import ListCreateDestroyViewSet
+from .permissions import AdminOrReadOnly, AuthorOrReadOnly, UserAPIPermissions
 from .permissions import AdminOrReadOnly, AuthorOrReadOnly, UserAPIPermissions
 
 User = get_user_model()
@@ -25,15 +29,6 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
 
-    def get_object(self):
-        username = self.kwargs.get('username')
-        if username == 'me':
-            user = self.request.user
-        else:
-            user = get_object_or_404(User, username=username)
-        self.check_object_permissions(self.request, user)
-        return user
-
     def destroy(self, request, *args, **kwargs):
         user = self.get_object()
         if user == request.user:
@@ -43,10 +38,10 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         user = self.request.user
-        if (user == serializer.instance
-                and not user.is_admin()
-                and 'role' in serializer.validated_data):
-            serializer.validated_data.pop('role')
+        # if (user == serializer.instance
+        #         and not user.is_admin()
+        #         and 'role' in serializer.validated_data):
+        #     serializer.validated_data.pop('role')
         serializer.save()
 
 
@@ -93,6 +88,26 @@ class TokenObtainView(views.APIView):
             {'token': str(token)},
             status=status.HTTP_200_OK
         )
+
+
+class MeUserView(views.APIView):
+
+    def get(self, request):
+        user = request.user
+        if user.is_authenticated:
+            serializer = serializers.MeUserSerializer(instance=user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+    def patch(self, request):
+        user = request.user
+        if not user.is_authenticated:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        serializer = serializers.MeUserSerializer(data=request.data, instance=user, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CommonViewSet(viewsets.ModelViewSet):
