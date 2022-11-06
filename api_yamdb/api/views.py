@@ -127,13 +127,8 @@ class GenreViewSet(ListCreateDestroyViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     permission_classes = (AdminOrReadOnly,)
-
     filterset_class = TitleFilter
-
-    def get_serializer_class(self):
-        if self.request.method in ('POST', 'PATCH',):
-            return serializers.TitlePostSerializer
-        return serializers.TitleGetSerializer
+    serializer_class = serializers.TitleSerializer
 
 
 class ReviewViewSet(CommonViewSet):
