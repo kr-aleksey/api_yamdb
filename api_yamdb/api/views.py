@@ -6,12 +6,11 @@ from rest_framework import filters
 from rest_framework.response import Response
 from rest_framework.validators import ValidationError
 from rest_framework_simplejwt.tokens import AccessToken
-from reviews.models import Category, Genre, Review, Title
 from users.services import send_confirmation_mail
 
+from reviews.models import Category, Genre, Review, Title
 from . import serializers
-from .filters import TitleFilter, UserFilter
-# from .filters CategoryFilter, GenreFilter
+from .filters import TitleFilter
 from .mixins import ListCreateDestroyViewSet
 from .permissions import AdminOrReadOnly, AuthorOrReadOnly, UserAPIPermissions
 
@@ -23,8 +22,6 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.UserSerializer
     permission_classes = [UserAPIPermissions]
     lookup_field = 'username'
-
-    # filterset_class = UserFilter
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
 
@@ -107,8 +104,6 @@ class CategoryViewSet(ListCreateDestroyViewSet):
     serializer_class = serializers.CategorySerializer
     permission_classes = (AdminOrReadOnly,)
     lookup_field = 'slug'
-
-    # filterset_class = CategoryFilter
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
 
@@ -118,8 +113,6 @@ class GenreViewSet(ListCreateDestroyViewSet):
     serializer_class = serializers.GenreSerializer
     permission_classes = (AdminOrReadOnly,)
     lookup_field = 'slug'
-
-    # filterset_class = GenreFilter
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
 
@@ -127,8 +120,8 @@ class GenreViewSet(ListCreateDestroyViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     permission_classes = (AdminOrReadOnly,)
-    filterset_class = TitleFilter
     serializer_class = serializers.TitleSerializer
+    filterset_class = TitleFilter
 
 
 class ReviewViewSet(CommonViewSet):

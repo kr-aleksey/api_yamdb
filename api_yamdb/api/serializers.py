@@ -123,18 +123,3 @@ class TitleSerializer(serializers.ModelSerializer):
         response['category'] = CategorySerializer(instance.category).data
         response['genre'] = GenreSerializer(instance.genre, many=True).data
         return response
-
-    # def create(self, validated_data):
-    #     genre = validated_data.pop('genre')
-    #     category = validated_data.pop('category')
-
-    #     title = Title.objects.create(**validated_data)
-
-    #     for slug in genre:
-    #         this_genre = Genre.objects.get(slug=slug)
-    #         title.genre.add(this_genre)
-
-    #     this_category = Category.objects.get(slug=category)
-    #     title.category.add(this_category)
-
-    #     return title
