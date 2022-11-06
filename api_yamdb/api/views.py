@@ -23,7 +23,7 @@ class ReviewViewSet(CommonViewSet):
     serializer_class = serializers.ReviewSerializer
 
     def get_queryset(self):
-        return Review.objects.all()
+        return Review.objects.filter(title__id=self.kwargs['title_id'])
 
     def perform_create(self, serializer):
         title = get_object_or_404(Title, id=self.kwargs['title_id'])
