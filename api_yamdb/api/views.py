@@ -24,9 +24,9 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [UserAPIPermissions]
     lookup_field = 'username'
 
-    filterset_class = UserFilter
-    # filter_backends = (filters.SearchFilter,)
-    # search_fields = ('username',)
+    # filterset_class = UserFilter
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
 
     def get_object(self):
         username = self.kwargs.get('username')
