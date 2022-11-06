@@ -1,4 +1,4 @@
-import statistics
+from statistics import mean
 from datetime import date
 
 from django.conf import settings
@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from reviews.models import Category, Comment, Genre, Review, Title
+# from reviews.models import GenreTitle
 
 User = get_user_model()
 
@@ -113,14 +114,20 @@ class TitleGetSerializer(serializers.ModelSerializer):
         score_review_list = []
         for review in review_list:
             score_review_list += review.score
-        rating = statistics.mean(score_review_list)
+        rating = mean(score_review_list)
         return rating
 
 
 class TitlePostSerializer(serializers.ModelSerializer):
 
-    genre = GenreSerializer(many=True,)
-    category = CategorySerializer()
+    genre = serializers.SlugRelatedField(
+        queryset=Genre.objects.all(),
+        slug_field='slug', many=True
+    )
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(),
+        slug_field='slug'
+    )
 
     class Meta:
         model = Title
@@ -128,6 +135,11 @@ class TitlePostSerializer(serializers.ModelSerializer):
             'id', 'name', 'year', 'description',
             'genre', 'category',
         )
+
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        response['category'] = CategorySerializer(instance.category).data
+        return response
 
     def validate_year(self, value):
         year_today = date.today().year

@@ -1,17 +1,19 @@
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import (filters, mixins)
-from rest_framework import views, viewsets, permissions, status
+from rest_framework import permissions, status, views, viewsets
+from rest_framework import filters
 from rest_framework.response import Response
 from rest_framework.validators import ValidationError
 from rest_framework_simplejwt.tokens import AccessToken
-
 from reviews.models import Category, Genre, Review, Title
 from users.services import send_confirmation_mail
+
 from . import serializers
-from .permissions import AdminOrReadOnly, AuthorOrReadOnly
+from .filters import TitleFilter, UserFilter
+# from .filters CategoryFilter, GenreFilter
+from .mixins import ListCreateDestroyViewSet
+from .permissions import AdminOrReadOnly, AuthorOrReadOnly, UserAPIPermissions
 
 User = get_user_model()
 
@@ -19,7 +21,36 @@ User = get_user_model()
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = serializers.UserSerializer
+    permission_classes = [UserAPIPermissions]
     lookup_field = 'username'
+
+    filterset_class = UserFilter
+    # filter_backends = (filters.SearchFilter,)
+    # search_fields = ('username',)
+
+    def get_object(self):
+        username = self.kwargs.get('username')
+        if username == 'me':
+            user = self.request.user
+        else:
+            user = get_object_or_404(User, username=username)
+        self.check_object_permissions(self.request, user)
+        return user
+
+    def destroy(self, request, *args, **kwargs):
+        user = self.get_object()
+        if user == request.user:
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def perform_update(self, serializer):
+        user = self.request.user
+        if (user == serializer.instance
+                and not user.is_admin()
+                and 'role' in serializer.validated_data):
+            serializer.validated_data.pop('role')
+        serializer.save()
 
 
 class SignupView(views.APIView):
@@ -71,19 +102,13 @@ class CommonViewSet(viewsets.ModelViewSet):
     permission_classes = (AuthorOrReadOnly, )
 
 
-class ListCreateDestroyViewSet(
-    mixins.ListModelMixin, mixins.CreateModelMixin,
-    mixins.DestroyModelMixin, viewsets.GenericViewSet
-):
-    pass
-
-
 class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = serializers.CategorySerializer
     permission_classes = (AdminOrReadOnly,)
     lookup_field = 'slug'
 
+    # filterset_class = CategoryFilter
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
 
@@ -94,6 +119,7 @@ class GenreViewSet(ListCreateDestroyViewSet):
     permission_classes = (AdminOrReadOnly,)
     lookup_field = 'slug'
 
+    # filterset_class = GenreFilter
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
 
@@ -102,13 +128,12 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     permission_classes = (AdminOrReadOnly,)
 
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('category', 'genre', 'name', 'year')
+    filterset_class = TitleFilter
 
     def get_serializer_class(self):
-        if self.request.method == 'GET':
-            return serializers.TitleGetSerializer
-        return serializers.TitlePostSerializer
+        if self.request.method == 'POST' or 'PATCH':
+            return serializers.TitlePostSerializer
+        return serializers.TitleGetSerializer
 
 
 class ReviewViewSet(CommonViewSet):
