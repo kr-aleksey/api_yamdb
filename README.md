@@ -44,7 +44,7 @@
 git clone https://github.com/kr-aleksey/api_yamdb
 ```
 
-* Cоздать и активировать виртуальное окружение:
+* Создать и активировать виртуальное окружение:
 ```
 python3 -m venv env
 source env/bin/activate

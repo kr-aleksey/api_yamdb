@@ -30,6 +30,9 @@ class User(AbstractUser):
         blank=True
     )
 
+    class Meta:
+        ordering = ('username', )
+
     def is_admin(self):
         """Возвращает True, если пользователь
         исполняет роль "Администратор". Иначе False."""
