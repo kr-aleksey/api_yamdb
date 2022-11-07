@@ -29,6 +29,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class MeUserSerializer(UserSerializer):
     role = serializers.CharField(read_only=True)
+
     class Mate:
         model = User
         fields = (
@@ -111,7 +112,7 @@ class TitleSerializer(serializers.ModelSerializer):
         queryset=Genre.objects.all(),
         slug_field='slug',
         many=True
-        )
+    )
     category = serializers.SlugRelatedField(
         queryset=Category.objects.all(),
         slug_field='slug'

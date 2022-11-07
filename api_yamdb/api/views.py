@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, views, viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.validators import ValidationError
@@ -90,7 +91,9 @@ class MeUserView(views.APIView):
         user = request.user
         if not user.is_authenticated:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-        serializer = serializers.MeUserSerializer(data=request.data, instance=user, partial=True)
+        serializer = serializers.MeUserSerializer(data=request.data,
+                                                  instance=user,
+                                                  partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -123,6 +126,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     permission_classes = (AdminOrReadOnly,)
     serializer_class = serializers.TitleSerializer
+    filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
 
 
@@ -159,7 +163,7 @@ class CommentViewSet(CommonViewSet):
         title = get_object_or_404(Title, id=self.kwargs['title_id'])
 
         if review.title != title:
-            raise ValidationError('Ревью не соответствует Произвдению')
+            raise ValidationError('Ревью не соответствует Произведению')
 
         serializer.save(
             author=self.request.user,
