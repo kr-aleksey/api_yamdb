@@ -9,6 +9,8 @@ User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
+# Яков:
+# Я бы разнес сериализаторы и вьюхи по разным приложениям, чтобы у нас не было смешения логики.
     class Meta:
         model = User
         fields = (

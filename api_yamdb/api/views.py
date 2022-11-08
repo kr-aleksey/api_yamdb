@@ -79,6 +79,9 @@ class TokenObtainView(views.APIView):
 
 
 class MeUserView(views.APIView):
+# Яков:
+# Я бы эту вьюху писал либо с помощью @action,
+# либо сделал дженерик класс в котором были бы только put/get методы.
 
     def get(self, request):
         user = request.user
@@ -95,6 +98,8 @@ class MeUserView(views.APIView):
                                                   instance=user,
                                                   partial=True)
         if serializer.is_valid():
+        # Яков:
+        # Я бы ставли флаг raise_exception=True, чтобы не создавать лишней вложенности.
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -124,6 +129,8 @@ class GenreViewSet(ListCreateDestroyViewSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
+    # Яков:
+    # Давайте не будем забывать про проблему N + 1.
     permission_classes = (AdminOrReadOnly,)
     serializer_class = serializers.TitleSerializer
     filter_backends = (DjangoFilterBackend,)
@@ -160,6 +167,8 @@ class CommentViewSet(CommonViewSet):
 
     def perform_create(self, serializer):
         review = get_object_or_404(Review, id=self.kwargs['review_id'])
+        # Яков:
+        # Дублируем код для получения ревью.
         title = get_object_or_404(Title, id=self.kwargs['title_id'])
 
         if review.title != title:

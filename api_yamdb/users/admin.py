@@ -28,3 +28,7 @@ class CustomUserAdmin(UserAdmin):
 
 
 admin.site.register(User, CustomUserAdmin)
+# Яков:
+# На мой взгляд декоратор @admin.register выглядит более лаконично и приятно,
+# чем вызов функции admin.site.register в коце файла.
+# Так мы точно не забудем добавить модель в админку.

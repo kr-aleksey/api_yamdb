@@ -5,6 +5,11 @@ User = get_user_model()
 
 
 class AuthorOrReadOnly(permissions.IsAuthenticatedOrReadOnly):
+# Яков:
+# По канону в начале должно быть Is.
+# А вообще мы тут врем. Имя пермиссии говорит, что доступ дан только автору, а по факту получается не так.
+# Я бы сделал 3 тонких пермисси под каждую роль и объединял их с помощью or/and.
+
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -12,6 +17,13 @@ class AuthorOrReadOnly(permissions.IsAuthenticatedOrReadOnly):
             User.MODERATOR,
             User.ADMIN
         ]:
+        # Яков:
+        # У нашего юзера есть методы, которые проверяют является ли юзер админом/модератором.
+        # Давайте использовать их.
+
+        # Алексей:
+        # Сори, я в понедельник добавил методы модели User и неуспел о них сказать: is_admin() и is_moderator()
+
             return True
         return False
 
@@ -32,6 +44,8 @@ class AdminOrReadOnly(permissions.BasePermission):
 
 
 class UserAPIPermissions(permissions.BasePermission):
+# Яков:
+# А что это за пермиссия такая?
     def has_permission(self, request, view):
         user = request.user
         if view.action in ['list', 'create', 'destroy']:

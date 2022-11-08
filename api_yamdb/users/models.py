@@ -34,6 +34,8 @@ class User(AbstractUser):
         ordering = ('username', )
 
     def is_admin(self):
+    # Яков:
+    # Я бы сделал из этой функции свойство.
         """Возвращает True, если пользователь
         исполняет роль "Администратор". Иначе False."""
         return self.is_superuser or self.role == self.ADMIN
