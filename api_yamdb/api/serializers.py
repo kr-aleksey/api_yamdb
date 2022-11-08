@@ -1,4 +1,5 @@
 from django.conf import settings
+from datetime import datetime
 from django.contrib.auth import get_user_model
 from django.db.models import Avg
 from rest_framework import serializers
@@ -140,3 +141,10 @@ class TitleSerializer(serializers.ModelSerializer):
         response['category'] = CategorySerializer(instance.category).data
         response['genre'] = GenreSerializer(instance.genre, many=True).data
         return response
+
+    def validate_year(self, value):
+        year_now = datetime.now().year
+        if not (0 < value <= year_now):
+            raise serializers.ValidationError(
+                'Проверьте год создания произведения!')
+        return value

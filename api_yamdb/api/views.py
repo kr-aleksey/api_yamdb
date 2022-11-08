@@ -128,7 +128,7 @@ class GenreViewSet(ListCreateDestroyViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Title.objects.select_related('category')
     # Яков:
     # Давайте не будем забывать про проблему N + 1.
     permission_classes = (AdminOrReadOnly,)
