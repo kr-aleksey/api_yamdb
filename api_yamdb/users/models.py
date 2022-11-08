@@ -33,6 +33,7 @@ class User(AbstractUser):
     class Meta:
         ordering = ('username', )
 
+    @property
     def is_admin(self):
     # Яков:
     # Я бы сделал из этой функции свойство.
@@ -40,6 +41,7 @@ class User(AbstractUser):
         исполняет роль "Администратор". Иначе False."""
         return self.is_superuser or self.role == self.ADMIN
 
+    @property
     def is_moderator(self):
         """Возвращает True, если пользователь
          исполняет роль "Модератор". Иначе False."""
