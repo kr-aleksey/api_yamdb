@@ -114,7 +114,7 @@ class MeUserView(views.APIView):
 
 class CommonViewSet(viewsets.ModelViewSet):
     permission_classes = (
-        IsAuthorOrReadOnly | IsModeratorOrReadOnly | IsAdminOrReadOnly
+        IsAuthorOrReadOnly | IsModeratorOrReadOnly | IsAdminOrReadOnly,
     )
 
 
