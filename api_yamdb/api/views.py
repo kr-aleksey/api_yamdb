@@ -12,7 +12,13 @@ from users.services import send_confirmation_mail
 from . import serializers
 from .filters import TitleFilter
 from .mixins import ListCreateDestroyViewSet
-from .permissions import AdminOrReadOnly, AuthorOrReadOnly, UserAPIPermissions
+from .permissions import (
+    AdminOrReadOnly,
+    UserAPIPermissions,
+    IsAdminOrReadOnly,
+    IsModeratorOrReadOnly,
+    IsAuthorOrReadOnly
+)
 
 User = get_user_model()
 
@@ -79,9 +85,9 @@ class TokenObtainView(views.APIView):
 
 
 class MeUserView(views.APIView):
-# Яков:
-# Я бы эту вьюху писал либо с помощью @action,
-# либо сделал дженерик класс в котором были бы только put/get методы.
+    # Яков:
+    # Я бы эту вьюху писал либо с помощью @action,
+    # либо сделал дженерик класс в котором были бы только put/get методы.
 
     def get(self, request):
         user = request.user
@@ -98,15 +104,18 @@ class MeUserView(views.APIView):
                                                   instance=user,
                                                   partial=True)
         if serializer.is_valid():
-        # Яков:
-        # Я бы ставли флаг raise_exception=True, чтобы не создавать лишней вложенности.
+            # Яков:
+            # Я бы ставли флаг raise_exception=True, чтобы не
+            # создавать лишней вложенности.
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CommonViewSet(viewsets.ModelViewSet):
-    permission_classes = (AuthorOrReadOnly, )
+    permission_classes = (
+        IsAuthorOrReadOnly | IsModeratorOrReadOnly | IsAdminOrReadOnly,
+    )
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):
@@ -160,13 +169,13 @@ class CommentViewSet(CommonViewSet):
     serializer_class = serializers.CommentSerializer
 
     def get_queryset(self):
-        review = get_object_or_404(Review, id=self.kwargs['review_id'])
-        return review.comments.all()
+        return self.get_review().comments.all()
+
+    def get_review(self):
+        return get_object_or_404(Review, id=self.kwargs['review_id'])
 
     def perform_create(self, serializer):
-        review = get_object_or_404(Review, id=self.kwargs['review_id'])
-        # Яков:
-        # Дублируем код для получения ревью.
+        review = self.get_review()
         title = get_object_or_404(Title, id=self.kwargs['title_id'])
 
         if review.title != title:
