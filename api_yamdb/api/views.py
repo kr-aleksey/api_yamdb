@@ -40,7 +40,8 @@ class GenreViewSet(ListCreateDestroyViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.select_related('category', 'genre')
+    queryset = Title.objects.select_related(
+        'category').prefetch_related('genre')
     permission_classes = (AdminOrReadOnly,)
     serializer_class = serializers.TitleSerializer
     filter_backends = (DjangoFilterBackend,)
