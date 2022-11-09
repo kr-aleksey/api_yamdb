@@ -139,7 +139,11 @@ class ReviewViewSet(CommonViewSet):
     serializer_class = serializers.ReviewSerializer
 
     def get_queryset(self):
-        return Review.objects.filter(title__id=self.kwargs['title_id'])
+        return Review.objects.filter(
+            title__id=self.kwargs['title_id']
+        ).select_related(
+            'author'
+        )
 
     def perform_create(self, serializer):
         title = get_object_or_404(Title, id=self.kwargs['title_id'])
@@ -161,12 +165,12 @@ class CommentViewSet(CommonViewSet):
 
     def get_queryset(self):
         review = get_object_or_404(Review, id=self.kwargs['review_id'])
-        return review.comments.all()
+        return review.comments.all().select_related(
+            'author'
+        )
 
     def perform_create(self, serializer):
         review = get_object_or_404(Review, id=self.kwargs['review_id'])
-        # Яков:
-        # Дублируем код для получения ревью.
         title = get_object_or_404(Title, id=self.kwargs['title_id'])
 
         if review.title != title:
