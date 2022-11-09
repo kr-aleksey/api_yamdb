@@ -7,11 +7,18 @@ from reviews.models import Category, Genre, Title, Review
 from . import serializers
 from .filters import TitleFilter
 from .mixins import ListCreateDestroyViewSet
-from .permissions import AdminOrReadOnly, AuthorOrReadOnly
+from .permissions import (
+    AdminOrReadOnly,
+    IsAdminOrReadOnly,
+    IsModeratorOrReadOnly,
+    IsAuthorOrReadOnly
+)
 
 
 class CommonViewSet(viewsets.ModelViewSet):
-    permission_classes = (AuthorOrReadOnly, )
+    permission_classes = (
+        IsAuthorOrReadOnly | IsModeratorOrReadOnly | IsAdminOrReadOnly,
+    )
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):
@@ -65,13 +72,13 @@ class CommentViewSet(CommonViewSet):
     serializer_class = serializers.CommentSerializer
 
     def get_queryset(self):
-        review = get_object_or_404(Review, id=self.kwargs['review_id'])
-        return review.comments.all()
+        return self.get_review().comments.all()
+
+    def get_review(self):
+        return get_object_or_404(Review, id=self.kwargs['review_id'])
 
     def perform_create(self, serializer):
-        review = get_object_or_404(Review, id=self.kwargs['review_id'])
-        # Яков:
-        # Дублируем код для получения ревью.
+        review = self.get_review()
         title = get_object_or_404(Title, id=self.kwargs['title_id'])
 
         if review.title != title:
