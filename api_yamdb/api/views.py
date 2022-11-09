@@ -8,7 +8,6 @@ from . import serializers
 from .filters import TitleFilter
 from .mixins import ListCreateDestroyViewSet
 from .permissions import (
-    AdminOrReadOnly,
     IsAdminOrReadOnly,
     IsModeratorOrReadOnly,
     IsAuthorOrReadOnly
@@ -24,7 +23,7 @@ class CommonViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = serializers.CategorySerializer
-    permission_classes = (AdminOrReadOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
     lookup_field = 'slug'
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
@@ -33,7 +32,7 @@ class CategoryViewSet(ListCreateDestroyViewSet):
 class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = serializers.GenreSerializer
-    permission_classes = (AdminOrReadOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
     lookup_field = 'slug'
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
@@ -41,7 +40,7 @@ class GenreViewSet(ListCreateDestroyViewSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.select_related('category', 'genre')
-    permission_classes = (AdminOrReadOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
     serializer_class = serializers.TitleSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
