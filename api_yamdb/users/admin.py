@@ -4,6 +4,7 @@ from django.contrib.auth.admin import UserAdmin
 from .models import User
 
 
+@admin.register(User)
 class CustomUserAdmin(UserAdmin):
     fieldsets = (
         (
@@ -25,10 +26,3 @@ class CustomUserAdmin(UserAdmin):
             {'fields': ('last_login', 'date_joined')}
         ),
     )
-
-
-admin.site.register(User, CustomUserAdmin)
-# Яков:
-# На мой взгляд декоратор @admin.register выглядит более лаконично и приятно,
-# чем вызов функции admin.site.register в коце файла.
-# Так мы точно не забудем добавить модель в админку.
