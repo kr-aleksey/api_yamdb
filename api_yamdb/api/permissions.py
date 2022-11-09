@@ -16,6 +16,12 @@ class IsAuthorOrReadOnly(permissions.IsAuthenticatedOrReadOnly):
 
 class IsAdminOrReadOnly(permissions.IsAuthenticatedOrReadOnly):
 
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        if request.user.is_authenticated:
+            return request.user.role == User.ADMIN
+
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
