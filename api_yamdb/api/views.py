@@ -88,16 +88,16 @@ class ReviewViewSet(CommonViewSet):
 class CommentViewSet(CommonViewSet):
     serializer_class = serializers.CommentSerializer
 
+    def get_review(self):
+        return get_object_or_404(Review, id=self.kwargs['review_id'])
+
     def get_queryset(self):
-        review = get_object_or_404(Review, id=self.kwargs['review_id'])
-        # Яков:
-        # Дублируем код получения ревью, его нужно вынести в отдельный метод.
-        return review.comments.all().select_related(
+        return self.get_review().comments.all().select_related(
             'author'
         )
 
     def perform_create(self, serializer):
-        review = get_object_or_404(Review, id=self.kwargs['review_id'])
+        review = self.get_review()
         title = get_object_or_404(Title, id=self.kwargs['title_id'])
 
         if review.title != title:
