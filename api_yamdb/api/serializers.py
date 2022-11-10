@@ -65,6 +65,9 @@ class TitleSerializer(serializers.ModelSerializer):
         queryset=Category.objects.all(),
         slug_field='slug'
     )
+    rating = serializers.IntegerField(
+        source='reviews__score__avg', read_only=True
+    )
 
     class Meta:
         model = Title
@@ -73,17 +76,12 @@ class TitleSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ('id', 'rating')
 
-    def get_rating(self, obj):
-        score_review_list = Review.objects.filter(
-            title=obj.id).aggregate(Avg('score'))
-        rating = score_review_list['score__avg']
-        if rating is None:
-            return None
-        return float('{:.1f}'.format(rating))
-
     def to_representation(self, instance):
         response = super().to_representation(instance)
         response['category'] = CategorySerializer(instance.category).data
+        # Яков:
+         # class TitleSerializer(ModelSerializer):
+         #     category = CategorySerializer()
         response['genre'] = GenreSerializer(instance.genre, many=True).data
         return response
 

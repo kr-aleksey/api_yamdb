@@ -1,3 +1,4 @@
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, viewsets
@@ -39,9 +40,13 @@ class GenreViewSet(ListCreateDestroyViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.select_related(
-        'category').prefetch_related(
-        'genre'
+    queryset = (
+        Title
+        .objects
+        .annotate(Avg('reviews__score'))
+        .select_related('category')
+        .prefetch_related('genre')
+        .order_by('name')
     )
     permission_classes = (IsAdminOrReadOnly,)
     serializer_class = serializers.TitleSerializer
@@ -53,6 +58,8 @@ class ReviewViewSet(CommonViewSet):
     serializer_class = serializers.ReviewSerializer
 
     def get_queryset(self):
+    # Яков:
+     # Дублируем код получения ревью, его нужно вынести в отдельный метод.
         return Review.objects.filter(
             title__id=self.kwargs['title_id']
         ).select_related(
