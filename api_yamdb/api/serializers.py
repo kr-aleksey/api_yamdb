@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from django.db.models import Avg
 from rest_framework import serializers
 
 from reviews.models import Category, Comment, Genre, Review, Title
@@ -65,6 +64,9 @@ class TitleSerializer(serializers.ModelSerializer):
         queryset=Category.objects.all(),
         slug_field='slug'
     )
+    rating = serializers.IntegerField(
+        source='reviews__score__avg', read_only=True
+    )
 
     class Meta:
         model = Title
@@ -72,17 +74,6 @@ class TitleSerializer(serializers.ModelSerializer):
             'id', 'name', 'year', 'description', 'rating', 'genre', 'category',
         )
         read_only_fields = ('id', 'rating')
-
-    def get_rating(self, obj):
-        # Яков:
-        # Этого метода быть не должно.
-        # У нас уже должно быть поле с рейтингом благодаря annotate в запросе из view.
-        score_review_list = Review.objects.filter(
-            title=obj.id).aggregate(Avg('score'))
-        rating = score_review_list['score__avg']
-        if rating is None:
-            return None
-        return float('{:.1f}'.format(rating))
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
