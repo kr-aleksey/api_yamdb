@@ -43,6 +43,17 @@ class TitleViewSet(viewsets.ModelViewSet):
         'category').prefetch_related(
         'genre'
     )
+    # Яков:
+    # На мой взгляд такой перенос длинных запросов в бд не очень удобный.
+    # Может быть такой способ тебе понравиться больше:
+    # ... = (
+    #        ModelName
+    #        .objects
+    #        .filter(...)
+    #        .select_related(...)
+    #        .prefetch_related(...)
+    #        .order_by(...)
+    # )
     permission_classes = (IsAdminOrReadOnly,)
     serializer_class = serializers.TitleSerializer
     filter_backends = (DjangoFilterBackend,)
@@ -79,6 +90,8 @@ class CommentViewSet(CommonViewSet):
 
     def get_queryset(self):
         review = get_object_or_404(Review, id=self.kwargs['review_id'])
+        # Яков:
+        # Дублируем код получения ревью, его нужно вынести в отдельный метод.
         return review.comments.all().select_related(
             'author'
         )

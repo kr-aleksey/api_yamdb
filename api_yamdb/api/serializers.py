@@ -74,6 +74,9 @@ class TitleSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'rating')
 
     def get_rating(self, obj):
+        # Яков:
+        # Этого метода быть не должно.
+        # У нас уже должно быть поле с рейтингом благодаря annotate в запросе из view.
         score_review_list = Review.objects.filter(
             title=obj.id).aggregate(Avg('score'))
         rating = score_review_list['score__avg']
@@ -84,6 +87,9 @@ class TitleSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         response = super().to_representation(instance)
         response['category'] = CategorySerializer(instance.category).data
+        # Яков:
+        # class TitleSerializer(ModelSerializer):
+        #     category = CategorySerializer()
         response['genre'] = GenreSerializer(instance.genre, many=True).data
         return response
 
