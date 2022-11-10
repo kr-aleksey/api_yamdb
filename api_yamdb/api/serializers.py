@@ -79,8 +79,8 @@ class TitleSerializer(serializers.ModelSerializer):
         response = super().to_representation(instance)
         response['category'] = CategorySerializer(instance.category).data
         # Яков:
-         # class TitleSerializer(ModelSerializer):
-         #     category = CategorySerializer()
+        # class TitleSerializer(ModelSerializer):
+        #     category = CategorySerializer()
         response['genre'] = GenreSerializer(instance.genre, many=True).data
         return response
 
