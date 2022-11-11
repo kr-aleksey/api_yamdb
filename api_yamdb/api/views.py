@@ -62,8 +62,6 @@ class ReviewViewSet(CommonViewSet):
     serializer_class = serializers.ReviewSerializer
 
     def get_queryset(self):
-    # Яков:
-     # Дублируем код получения ревью, его нужно вынести в отдельный метод.
         return Review.objects.filter(
             title__id=self.kwargs['title_id']
         ).select_related(
