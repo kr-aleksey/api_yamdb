@@ -48,21 +48,14 @@ class TitleViewSet(viewsets.ModelViewSet):
         .prefetch_related('genre')
         .order_by('name')
     )
-    # Яков:
-    # На мой взгляд такой перенос длинных запросов в бд не очень удобный.
-    # Может быть такой способ тебе понравиться больше:
-    # ... = (
-    #        ModelName
-    #        .objects
-    #        .filter(...)
-    #        .select_related(...)
-    #        .prefetch_related(...)
-    #        .order_by(...)
-    # )
     permission_classes = (IsAdminOrReadOnly,)
-    serializer_class = serializers.TitleSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
+
+    def get_serializer_class(self):
+        if self.request.method in 'GET':
+            return serializers.TitleReadSerializer
+        return serializers.TitleCreateSerializer
 
 
 class ReviewViewSet(CommonViewSet):

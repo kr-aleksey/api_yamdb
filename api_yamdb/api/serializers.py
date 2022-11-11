@@ -52,16 +52,13 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = ('name', 'slug',)
 
 
-class TitleSerializer(serializers.ModelSerializer):
-
-    genre = serializers.SlugRelatedField(
-        queryset=Genre.objects.all(),
-        slug_field='slug',
+class TitleReadSerializer(serializers.ModelSerializer):
+    genre = GenreSerializer(
+        read_only=True,
         many=True
     )
-    category = serializers.SlugRelatedField(
-        queryset=Category.objects.all(),
-        slug_field='slug'
+    category = CategorySerializer(
+        read_only=True
     )
     rating = serializers.IntegerField(
         source='reviews__score__avg', read_only=True
@@ -72,16 +69,24 @@ class TitleSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'name', 'year', 'description', 'rating', 'genre', 'category',
         )
-        read_only_fields = ('id', 'rating')
 
-    def to_representation(self, instance):
-        response = super().to_representation(instance)
-        response['category'] = CategorySerializer(instance.category).data
-        # Яков:
-        # class TitleSerializer(ModelSerializer):
-        #     category = CategorySerializer()
-        response['genre'] = GenreSerializer(instance.genre, many=True).data
-        return response
+
+class TitleCreateSerializer(TitleReadSerializer):
+    genre = serializers.SlugRelatedField(
+        queryset=Genre.objects.all(),
+        slug_field='slug',
+        many=True
+    )
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(),
+        slug_field='slug'
+    )
+
+    class Meta:
+        model = Title
+        fields = (
+            'id', 'name', 'year', 'description', 'rating', 'genre', 'category',
+        )
 
     def validate_year(self, value):
         year_now = datetime.now().year
